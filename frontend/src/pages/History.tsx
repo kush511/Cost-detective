@@ -67,7 +67,7 @@ export function History() {
 
           {!loading && !items.length ? (
             <div className="rounded-3xl border border-slate-800 bg-slate-950/70 p-8 text-center text-slate-400 shadow-glow">
-              No saved analyses yet.
+              No analyses yet.
             </div>
           ) : null}
 

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { LoadingSpinner } from '../components/LoadingSpinner';
 import { useAuth } from '../hooks/useAuth';
 import { getApiErrorMessage } from '../services/api';
+import { consumeAuthMessage } from '../utils/auth';
 
 export function Login() {
   const navigate = useNavigate();
@@ -11,6 +12,7 @@ export function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sessionMessage] = useState(() => consumeAuthMessage());
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,6 +37,8 @@ export function Login() {
           <h1 className="mt-3 text-3xl font-semibold">Sign in</h1>
           <p className="mt-2 text-sm leading-6 text-slate-400">Access your AWS cost optimization dashboard.</p>
         </div>
+
+        {sessionMessage ? <p className="mb-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-100">{sessionMessage}</p> : null}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>

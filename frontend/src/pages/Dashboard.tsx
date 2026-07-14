@@ -6,7 +6,7 @@ import { Navbar } from '../components/Navbar';
 import { ProgressTracker } from '../components/ProgressTracker';
 import { Sidebar } from '../components/Sidebar';
 import { api, getApiErrorMessage } from '../services/api';
-import { subscribeToProgress } from '../services/socket';
+import { connectProgressSocket, disconnectProgressSocket, subscribeToProgress, subscribeToProgressStatus } from '../services/socket';
 import { useAuth } from '../hooks/useAuth';
 import { normalizeReport, saveLastReport } from '../utils/report';
 import type { ProgressUpdate } from '../types';
@@ -58,18 +58,6 @@ export function Dashboard() {
     };
   }, []);
 
-  useEffect(() => {
-    setSocketConnected(true);
-    const cleanup = subscribeToProgress((update) => {
-      setProgress(update);
-    });
-
-    return () => {
-      setSocketConnected(false);
-      cleanup();
-    };
-  }, []);
-
   async function handleAnalyze() {
     if (!region) {
       setError('Please select a region first.');
@@ -78,6 +66,18 @@ export function Dashboard() {
 
     setSubmitting(true);
     setError('');
+    setProgress({ analysisId: '', step: 'Starting analysis...', progress: 0 });
+
+    const disconnectStatus = subscribeToProgressStatus({
+      onConnect: () => setSocketConnected(true),
+      onDisconnect: () => setSocketConnected(false),
+      onReconnect: () => setSocketConnected(true),
+    });
+
+    connectProgressSocket();
+    const stopProgressSubscription = subscribeToProgress((update) => {
+      setProgress(update);
+    });
 
     try {
       const response = await api.post('/analyze', { region });
@@ -87,7 +87,11 @@ export function Dashboard() {
     } catch (analysisError) {
       setError(getApiErrorMessage(analysisError, 'Analysis failed.'));
     } finally {
+      stopProgressSubscription();
+      disconnectStatus();
+      disconnectProgressSocket();
       setSubmitting(false);
+      setSocketConnected(false);
     }
   }
 
@@ -124,7 +128,7 @@ export function Dashboard() {
                     className="w-full rounded-2xl border border-slate-800 bg-slate-900/90 px-4 py-3 text-white outline-none transition focus:border-accent-500"
                   >
                     {loadingRegions ? <option>Loading regions...</option> : null}
-                    {!loadingRegions && !regions.length ? <option>No regions available</option> : null}
+                    {!loadingRegions && !regions.length ? <option>No AWS regions found.</option> : null}
                     {regions.map((item) => (
                       <option key={item.name} value={item.name}>
                         {item.name} - {item.description}

@@ -1,5 +1,5 @@
 import axios, { AxiosError } from 'axios';
-import { clearSession, getStoredToken } from '../utils/auth';
+import { clearSession, getStoredToken, setAuthMessage } from '../utils/auth';
 
 const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -23,6 +23,7 @@ api.interceptors.response.use(
   (response) => response,
   (error: AxiosError) => {
     if (error.response?.status === 401 && getStoredToken()) {
+      setAuthMessage('Session expired. Please login again.');
       clearSession();
     }
 
@@ -52,6 +53,10 @@ export function getApiErrorMessage(error: unknown, fallback = 'Request failed.')
 
     if (error.response?.status === 503) {
       return 'Database unavailable. Please try again later.';
+    }
+
+    if (error.code === 'ERR_NETWORK' || !error.response) {
+      return 'Network error. Check your connection and try again.';
     }
 
     return error.message || fallback;

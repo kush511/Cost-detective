@@ -31,3 +31,51 @@ export function subscribeToProgress(handler: (update: ProgressUpdate) => void) {
     }
   };
 }
+
+export function subscribeToProgressStatus(
+  handlers: {
+    onConnect?: () => void;
+    onDisconnect?: () => void;
+    onReconnect?: () => void;
+  } = {}
+) {
+  const socket = getProgressSocket();
+
+  if (handlers.onConnect) {
+    socket.on('connect', handlers.onConnect);
+  }
+
+  if (handlers.onDisconnect) {
+    socket.on('disconnect', handlers.onDisconnect);
+  }
+
+  if (handlers.onReconnect) {
+    socket.io.on('reconnect', handlers.onReconnect);
+  }
+
+  return () => {
+    if (handlers.onConnect) {
+      socket.off('connect', handlers.onConnect);
+    }
+
+    if (handlers.onDisconnect) {
+      socket.off('disconnect', handlers.onDisconnect);
+    }
+
+    if (handlers.onReconnect) {
+      socket.io.off('reconnect', handlers.onReconnect);
+    }
+  };
+}
+
+export function connectProgressSocket() {
+  const socket = getProgressSocket();
+  socket.connect();
+  return socket;
+}
+
+export function disconnectProgressSocket() {
+  if (progressSocket) {
+    progressSocket.disconnect();
+  }
+}

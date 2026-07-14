@@ -134,7 +134,7 @@ export function Report() {
             </div>
 
             {!issues.length ? (
-              <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-400">No issues were returned by the analysis model.</div>
+              <div className="rounded-2xl border border-slate-800 bg-slate-900/70 p-6 text-sm text-slate-300">No optimization opportunities found.</div>
             ) : (
               <div className="space-y-4">
                 {issues.map((issue, index) => (

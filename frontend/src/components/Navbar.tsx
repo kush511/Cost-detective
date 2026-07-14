@@ -10,9 +10,14 @@ export function Navbar() {
   return (
     <header className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-xl">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-4 sm:px-6 lg:px-8">
-        <div>
-          <p className="text-xs uppercase tracking-[0.34em] text-accent-500">Cloud Cost Detective</p>
-          <h1 className="text-lg font-semibold text-white">AWS Cost Intelligence</h1>
+        <div className="flex items-center gap-3">
+          <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-accent-500/30 bg-accent-500/10 text-sm font-bold text-accent-500">
+            CCD
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.34em] text-accent-500">Cloud Cost Detective</p>
+            <h1 className="text-lg font-semibold text-white">AWS Cost Intelligence</h1>
+          </div>
         </div>
 
         <nav className="hidden items-center gap-2 md:flex">

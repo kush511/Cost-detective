@@ -2,6 +2,7 @@ import type { AuthUser } from '../types';
 
 const TOKEN_KEY = 'cloud-cost-token';
 const USER_KEY = 'cloud-cost-user';
+const MESSAGE_KEY = 'cloud-cost-auth-message';
 export const AUTH_STORAGE_EVENT = 'cloud-cost-auth-storage-changed';
 
 function emitAuthChange() {
@@ -38,6 +39,20 @@ export function clearSession() {
   localStorage.removeItem(TOKEN_KEY);
   localStorage.removeItem(USER_KEY);
   emitAuthChange();
+}
+
+export function setAuthMessage(message: string) {
+  sessionStorage.setItem(MESSAGE_KEY, message);
+}
+
+export function consumeAuthMessage() {
+  const message = sessionStorage.getItem(MESSAGE_KEY);
+
+  if (message) {
+    sessionStorage.removeItem(MESSAGE_KEY);
+  }
+
+  return message;
 }
 
 export function hasSession() {
