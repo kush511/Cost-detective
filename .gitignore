@@ -1,0 +1,4 @@
+.env
+node_modules
+prompts
+PROJECT_RULES.md
