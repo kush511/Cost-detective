@@ -7,6 +7,7 @@ dotenv.config();
 
 const analysisRoutes = require('./routes/analysis');
 const historyRoutes = require('./routes/history');
+const authRoutes = require('./routes/auth');
 const { initSocket } = require('./socket/socket');
 const { initializeDatabase } = require('./database/db');
 
@@ -30,6 +31,7 @@ app.get('/api', (req, res) => {
   });
 });
 
+app.use('/api/auth', authRoutes);
 app.use('/api', analysisRoutes);
 app.use('/api', historyRoutes);
 

@@ -1,11 +1,12 @@
 const express = require('express');
 const { getAnalysisById, getAnalysisHistory } = require('../services/historyService');
+const { requireAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-router.get('/history', async (req, res) => {
+router.get('/history', requireAuth, async (req, res) => {
   try {
-    const history = await getAnalysisHistory();
+    const history = await getAnalysisHistory(req.user.id);
     return res.status(200).json(history);
   } catch (error) {
     console.error('Failed to fetch analysis history:', error);
@@ -16,7 +17,7 @@ router.get('/history', async (req, res) => {
   }
 });
 
-router.get('/history/:id', async (req, res) => {
+router.get('/history/:id', requireAuth, async (req, res) => {
   try {
     const analysis = await getAnalysisById(req.params.id);
 
@@ -24,6 +25,13 @@ router.get('/history/:id', async (req, res) => {
       return res.status(404).json({
         success: false,
         message: 'Analysis not found.',
+      });
+    }
+
+    if (analysis.userId !== req.user.id) {
+      return res.status(403).json({
+        success: false,
+        message: 'Forbidden.',
       });
     }
 

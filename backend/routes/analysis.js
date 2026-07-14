@@ -4,6 +4,7 @@ const { analyzeInfrastructure, getHealthStatus, listAvailableRegions } = require
 const { analyzeAwsResources } = require('../services/aiAnalyzer');
 const { emitProgressStep } = require('../socket/socket');
 const { saveAnalysis } = require('../services/historyService');
+const { requireAuth } = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
@@ -92,7 +93,7 @@ router.get('/health', async (req, res) => {
   }
 });
 
-router.get('/regions', async (req, res) => {
+router.get('/regions', requireAuth, async (req, res) => {
   try {
     const regions = await listAvailableRegions();
     return res.status(200).json(regions);
@@ -104,7 +105,7 @@ router.get('/regions', async (req, res) => {
   }
 });
 
-router.post('/analyze', async (req, res) => {
+router.post('/analyze', requireAuth, async (req, res) => {
   const analysisId = randomUUID();
   const stopProgress = startProgressEmitter(analysisId);
 
@@ -152,6 +153,7 @@ router.post('/analyze', async (req, res) => {
     try {
       savedAnalysis = await saveAnalysis({
         id: analysisId,
+        userId: req.user.id,
         region: finalReport.region,
         resourcesScanned: countScannedResources(finalReport.resources),
         issuesFound: getIssuesFound(finalReport.analysis),

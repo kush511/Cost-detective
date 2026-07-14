@@ -8,6 +8,7 @@ function normalizeAnalysisRow(row) {
 
   return {
     id: row.id,
+    userId: row.user_id,
     region: row.region,
     resourcesScanned: row.resources_scanned,
     issuesFound: row.issues_found,
@@ -25,6 +26,7 @@ async function saveAnalysis(record) {
       `
         INSERT INTO analyses (
           id,
+          user_id,
           region,
           resources_scanned,
           issues_found,
@@ -32,11 +34,12 @@ async function saveAnalysis(record) {
           estimated_annual_savings,
           health_score,
           analysis_result
-        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8::jsonb)
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9::jsonb)
         RETURNING *
       `,
       [
         id,
+        record.userId,
         record.region,
         record.resourcesScanned,
         record.issuesFound,
@@ -61,11 +64,12 @@ async function saveAnalysis(record) {
   }
 }
 
-async function getAnalysisHistory() {
+async function getAnalysisHistory(userId) {
   const result = await query(
     `
       SELECT
         id,
+        user_id,
         region,
         resources_scanned,
         issues_found,
@@ -74,12 +78,15 @@ async function getAnalysisHistory() {
         health_score,
         created_at
       FROM analyses
+      WHERE user_id = $1
       ORDER BY created_at DESC
-    `
+    `,
+    [userId]
   );
 
   return result.rows.map((row) => ({
     id: row.id,
+    userId: row.user_id,
     region: row.region,
     resourcesScanned: row.resources_scanned,
     issuesFound: row.issues_found,
@@ -95,6 +102,7 @@ async function getAnalysisById(id) {
     `
       SELECT
         id,
+        user_id,
         region,
         resources_scanned,
         issues_found,

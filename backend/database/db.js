@@ -78,8 +78,18 @@ async function initializeDatabase() {
   }
 
   await query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      created_at TIMESTAMP DEFAULT NOW()
+    )
+  `);
+
+  await query(`
     CREATE TABLE IF NOT EXISTS analyses (
       id UUID PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
       region TEXT,
       resources_scanned INTEGER,
       issues_found INTEGER,
@@ -89,6 +99,11 @@ async function initializeDatabase() {
       analysis_result JSONB,
       created_at TIMESTAMP DEFAULT NOW()
     )
+  `);
+
+  await query(`
+    ALTER TABLE analyses
+    ADD COLUMN IF NOT EXISTS user_id INTEGER REFERENCES users(id) ON DELETE CASCADE
   `);
 }
 
