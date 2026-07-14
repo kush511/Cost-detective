@@ -1,13 +1,20 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const http = require('http');
 
 dotenv.config();
 
 const analysisRoutes = require('./routes/analysis');
+const historyRoutes = require('./routes/history');
+const { initSocket } = require('./socket/socket');
+const { initializeDatabase } = require('./database/db');
 
 const app = express();
 const port = Number(process.env.PORT || 5000);
+const server = http.createServer(app);
+
+initSocket(server);
 
 app.use(
   cors({
@@ -24,6 +31,7 @@ app.get('/api', (req, res) => {
 });
 
 app.use('/api', analysisRoutes);
+app.use('/api', historyRoutes);
 
 app.use((req, res) => {
   return res.status(404).json({
@@ -40,10 +48,20 @@ app.use((error, req, res, next) => {
   });
 });
 
-if (require.main === module) {
-  app.listen(port, () => {
+async function startServer() {
+  try {
+    await initializeDatabase();
+  } catch (error) {
+    console.error('Database initialization failed:', error.message);
+  }
+
+  server.listen(port, () => {
     console.log(`Backend server listening on port ${port}`);
   });
+}
+
+if (require.main === module) {
+  startServer();
 }
 
 module.exports = app;
